@@ -1,0 +1,68 @@
+name: Container Apps Monitoring
+
+on:
+  schedule:
+    - cron: "*/30 * * * *" # Runs every 30 minutes
+  workflow_dispatch:
+
+env:
+  AZURE_CONTAINERAPPS_ENVIRONMENT: drone-delivery-env
+  RESOURCE_GROUP: drone-delivery-rg
+
+jobs:
+  monitor-apps:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Check Container Apps Health
+        run: |
+          apps=(drone-delivery-api drone-delivery-frontend)
+          for app in "${apps[@]}"
+          do
+            status=$(az containerapp show -n $app -g ${{ env.RESOURCE_GROUP }} --query "properties.outboundIpAddress" -o tsv)
+            if [ -z "$status" ]; then
+              echo "::error::Container App $app is not responding"
+              exit 1
+            fi
+          done
+
+      - name: Monitor Resource Usage
+        run: |
+          az monitor metrics list \
+            --resource ${{ env.AZURE_CONTAINERAPPS_ENVIRONMENT }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --metric "CpuUsage,MemoryUsage" \
+            --output table
+
+      - name: Check for Errors
+        run: |
+          current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          past_time=$(date -u -d "30 minutes ago" +"%Y-%m-%dT%H:%M:%SZ")
+
+          az monitor activity-log list \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --start-time $past_time \
+            --end-time $current_time \
+            --filter "eventTimestamp ge '$past_time' and status eq 'Failed'"
+
+      - name: Send Alert on Failure
+        if: failure()
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            $ErrorActionPreference = 'Stop'
+            Send-AzAlertMessage `
+              -EmailAddress ${{ secrets.ALERT_EMAIL }} `
+              -Subject "Container Apps Alert" `
+              -Body "Monitoring check failed. Please check the GitHub Actions logs."
+          azPSVersion: "latest"
+
+      - name: Azure Logout
+        if: always()
+        run: |
+          az logout
