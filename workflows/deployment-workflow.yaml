@@ -1,0 +1,50 @@
+name: Deploy Drone Delivery Container Apps
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  AZURE_CONTAINERAPPS_ENVIRONMENT: drone-delivery-env
+  RESOURCE_GROUP: drone-delivery-rg
+  LOCATION: eastus
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and Push Container Images
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Deploy to Azure Container Apps
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          resourceGroup: ${{ env.RESOURCE_GROUP }}
+          containerappsEnvironment: ${{ env.AZURE_CONTAINERAPPS_ENVIRONMENT }}
+          targetPort: 80
+          ingress: "external"
+          containerAppsNames: |
+            drone-delivery-api
+            drone-delivery-frontend
+          imageToDeploy: |
+            ${{ secrets.REGISTRY_LOGIN_SERVER }}/drone-delivery-api:${{ github.sha }}
+            ${{ secrets.REGISTRY_LOGIN_SERVER }}/drone-delivery-frontend:${{ github.sha }}
+
+      - name: Azure Logout
+        run: |
+          az logout
