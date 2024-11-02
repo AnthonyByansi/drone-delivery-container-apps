@@ -22,6 +22,7 @@ First, you need to install the Bicep CLI, which is used to build, validate, and 
    chmod +x bicep-linux-x64
    sudo mv bicep-linux-x64 /usr/local/bin/bicep
    ```
+   
 
 ### Step 2: Install Azure CLI
 
