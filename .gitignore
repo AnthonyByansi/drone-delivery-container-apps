@@ -1,0 +1,64 @@
+# Logs and system files
+*.log
+*.temp
+*.tmp
+*.bak
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Sensitive files (do not commit credentials or secrets)
+*.env
+secrets.json
+*.key
+*.pem
+
+# Azure-specific files
+*.azcli
+*.azjson
+
+# Node.js dependencies (if any scripts require Node.js)
+node_modules/
+
+# Python environment (if using Python scripts)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+
+# Terraform files (if used)
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# Bicep build outputs
+*.json
+.bicep/
+*.bicep.cache
+
+# Temporary build or deployment files
+tmp/
+dist/
+build/
+out/
+
+# IDE/Editor specific files
+.vscode/
+.idea/
+*.code-workspace
+
+# OS-generated files
+*.DS_Store
+*.class
+*.lock
+*.gz
+*.zip
+
+# Backup files
+*.bak
+*.old
+*.orig
+*.rej
