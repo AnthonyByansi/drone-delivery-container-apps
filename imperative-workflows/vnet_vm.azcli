@@ -1,0 +1,33 @@
+# Variables
+RESOURCE_GROUP="MyComplexRG"
+LOCATION="eastus"
+VNET_NAME="MyVNet"
+SUBNET_NAME="MySubnet"
+VM_NAME="MyVM"
+VM_SIZE="Standard_B2s"
+IMAGE="UbuntuLTS"
+ADMIN_USER="azureuser"
+PASSWORD="ComplexP@ssw0rd123"
+
+# Create Resource Group
+az group create --name $RESOURCE_GROUP --location $LOCATION
+
+# Create Virtual Network and Subnet
+az network vnet create \
+  --resource-group $RESOURCE_GROUP \
+  --name $VNET_NAME \
+  --address-prefix "10.0.0.0/16" \
+  --subnet-name $SUBNET_NAME \
+  --subnet-prefix "10.0.0.0/24"
+
+# Create Virtual Machine
+az vm create \
+  --resource-group $RESOURCE_GROUP \
+  --name $VM_NAME \
+  --vnet-name $VNET_NAME \
+  --subnet $SUBNET_NAME \
+  --image $IMAGE \
+  --size $VM_SIZE \
+  --admin-username $ADMIN_USER \
+  --admin-password $PASSWORD \
+  --public-ip-sku Standard

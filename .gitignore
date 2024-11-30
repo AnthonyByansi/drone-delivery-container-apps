@@ -15,7 +15,7 @@ secrets.json
 *.pem
 
 # Azure-specific files
-*.azcli
+# *.azcli
 *.azjson
 
 # Node.js dependencies (if any scripts require Node.js)
