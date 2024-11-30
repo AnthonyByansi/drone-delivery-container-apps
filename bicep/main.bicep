@@ -6,7 +6,7 @@ param ingressHostName string = 'drone-delivery.${resourceGroupLocation}.azurecon
 
 // Resource Identifiers
 var containerAppEnvId = resourceId('Microsoft.App/managedEnvironments', environmentName)
-var acrId = resourceId('Microsoft.ContainerRegistry/registries', containerRegistryName)
+// var acrId = resourceId('Microsoft.ContainerRegistry/registries', containerRegistryName)
 
 // Deploy Managed Environment for Azure Container Apps
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' = {
